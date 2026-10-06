@@ -11,6 +11,7 @@ local COPPER_PER_GOLD = 10000
 local COPPER_PER_SILVER = 100
 
 function M.to_gsc(money)
+	money = tonumber(money) or 0
 	local gold = floor(money / COPPER_PER_GOLD)
 	local silver = floor(mod(money, COPPER_PER_GOLD) / COPPER_PER_SILVER)
 	local copper = mod(money, COPPER_PER_SILVER)
@@ -18,10 +19,14 @@ function M.to_gsc(money)
 end
 
 function M.from_gsc(gold, silver, copper)
+	gold = tonumber(gold) or 0
+	silver = tonumber(silver) or 0
+	copper = tonumber(copper) or 0
 	return gold * COPPER_PER_GOLD + silver * COPPER_PER_SILVER + copper
 end
 
 function M.to_string2(money, exact, color)
+	money = tonumber(money) or 0
 	color = color or FONT_COLOR_CODE_CLOSE
 
 	local TEXT_NONE = '0'
@@ -59,6 +64,7 @@ function M.to_string2(money, exact, color)
 end
 
 function M.to_string(money, pad, trim, color, no_color)
+	money = tonumber(money) or 0
 	local is_negative = money < 0
 	money = abs(money)
 	local gold, silver, copper = to_gsc(money)

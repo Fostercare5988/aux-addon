@@ -27,7 +27,7 @@ refresh = true
 selected_item = nil
 
 function get_default_settings()
-	return T.map('duration', aux.account_data.post_duration, 'start_price', 0, 'buyout_price', 0, 'hidden', false, 'stack_size', 1)
+	return T.map('duration', aux.account_data.post_duration or DURATION_24, 'start_price', 0, 'buyout_price', 0, 'hidden', false, 'stack_size', 1)
 end
 
 function aux.handle.LOAD2()
@@ -35,11 +35,21 @@ function aux.handle.LOAD2()
 end
 
 function read_settings(item_key)
-	item_key = item_key or selected_item.key
-	return data[item_key] and persistence.read(settings_schema, data[item_key]) or get_default_settings()
+	item_key = item_key or (selected_item and selected_item.key)
+	if not item_key then
+		return get_default_settings()
+	end
+	local settings = data[item_key] and persistence.read(settings_schema, data[item_key]) or get_default_settings()
+	settings.duration = settings.duration or aux.account_data.post_duration or DURATION_24
+	settings.start_price = settings.start_price or 0
+	settings.buyout_price = settings.buyout_price or 0
+	settings.hidden = not not settings.hidden
+	settings.stack_size = settings.stack_size or 1
+	return settings
 end
 function write_settings(settings, item_key)
-	item_key = item_key or selected_item.key
+	item_key = item_key or (selected_item and selected_item.key)
+	if not item_key then return end
 	data[item_key] = persistence.write(settings_schema, settings)
 end
 
@@ -86,7 +96,7 @@ end
 
 function set_unit_start_price(amount)
 	local settings = read_settings()
-	settings.start_price = amount
+	settings.start_price = amount or 0
 	write_settings(settings)
 end
 
@@ -96,7 +106,7 @@ end
 
 function set_unit_buyout_price(amount)
 	local settings = read_settings()
-	settings.buyout_price = amount
+	settings.buyout_price = amount or 0
 	write_settings(settings)
 end
 
@@ -364,10 +374,13 @@ function update_item_configuration()
 
         do
             local deposit_factor = 0.025
-            local duration_factor = UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
-            local stack_size, stack_count = selected_item.max_charges and 1 or stack_size_slider:GetValue(), stack_count_slider:GetValue()
-            local max_stack = selected_item.max_stack
-            local amount = floor(selected_item.unit_vendor_price * stack_size * duration_factor * (1 + (max_stack - stack_size) * 0.05) * deposit_factor) * stack_count
+            local duration = UIDropDownMenu_GetSelectedValue(duration_dropdown) or DURATION_24
+            local duration_factor = duration / 120
+            local stack_size = selected_item.max_charges and 1 or (stack_size_slider:GetValue() or 1)
+            local stack_count = stack_count_slider:GetValue() or 1
+            local max_stack = selected_item.max_stack or 1
+            local unit_vendor_price = selected_item.unit_vendor_price or 0
+            local amount = floor(unit_vendor_price * stack_size * duration_factor * (1 + (max_stack - stack_size) * 0.05) * deposit_factor) * stack_count
             deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, aux.color.text.enabled))
         end
 
@@ -468,7 +481,6 @@ function update_item(item)
 		stack_size_slider:SetValue(aux.huge)
 	else
 		-- post_stack ON: Use saved stack size if available, otherwise full stack
-		local settings = read_settings(selected_item.key)
 		if settings.stack_size and settings.stack_size > 0 and settings.stack_size <= ii then
 			stack_size_slider:SetValue(settings.stack_size)
 		else
@@ -478,8 +490,8 @@ function update_item(item)
 
     quantity_update(true)
 
-    unit_start_price_input:SetText(money.to_string(settings.start_price, true, nil, nil, true))
-    unit_buyout_price_input:SetText(money.to_string(settings.buyout_price, true, nil, nil, true))
+    unit_start_price_input:SetText(money.to_string(settings.start_price or 0, true, nil, nil, true))
+    unit_buyout_price_input:SetText(money.to_string(settings.buyout_price or 0, true, nil, nil, true))
 
     if not bid_records[selected_item.key] then
         refresh_entries()
