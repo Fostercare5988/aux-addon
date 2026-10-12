@@ -165,8 +165,11 @@ end
 function scan_wdb(item_id)
 	item_id = item_id or MIN_ITEM_ID
 
-	local processed = 0
-	while processed <= 100 and item_id <= MAX_ITEM_ID do
+	-- Known and missing IDs still cost a native query. Bound probes as well as
+	-- newly discovered metadata so a warm cache cannot scan 99,999 IDs inline.
+	local processed, probed = 0, 0
+	while processed <= 100 and probed < 1000 and item_id <= MAX_ITEM_ID do
+		probed = probed + 1
 		local itemstring = 'item:' .. item_id
 		local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
 		if name and not aux.account_data.item_ids[strlower(name)] then
@@ -191,7 +194,9 @@ function scan_wdb(item_id)
 	end
 
 	if item_id <= MAX_ITEM_ID then
-		aux.thread(aux.when, aux.later(.5), scan_wdb, item_id)
+		-- Preserve the existing metadata/tooltip throttle. Probe-only chunks need
+		-- a short positive delay so the thread scheduler cannot finish them inline.
+		aux.thread(aux.when, aux.later(processed > 100 and .5 or .01), scan_wdb, item_id)
 	else
 		sort(aux.account_data.auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
 	end
