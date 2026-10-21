@@ -3,7 +3,7 @@
 ## Dependencies: !!!ClassicAPI
 ## Author: shirsig
 ## OptionalDeps: ShaguTweaks
-## Title: aux
+## Title: |cffff9e38aux|r |cffffd6a8[Fostercare5988]|r
 ## Notes: Auction House replacement
 ## SavedVariables: aux
 
