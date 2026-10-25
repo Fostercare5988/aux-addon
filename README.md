@@ -9,7 +9,7 @@
 
 ## Requirements
 
-- ClassicAPI 1.16.0 or later.
+- ClassicAPI 1.17.7 or later.
 
 "Why is aux so slow on turtle wow?"
 The rate at which the client receives auction data is intentionally limited by the server, there is nothing addons can do here.

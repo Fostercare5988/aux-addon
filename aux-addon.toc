@@ -1,5 +1,5 @@
 ## Interface: 11200
-## X-ClassicAPI-Min-Version: 1.16.0
+## X-ClassicAPI-Min-Version: 1.17.7
 ## Dependencies: !!!ClassicAPI
 ## Author: shirsig
 ## OptionalDeps: ShaguTweaks
