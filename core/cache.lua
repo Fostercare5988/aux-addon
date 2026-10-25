@@ -89,7 +89,13 @@ function M.merchant_info(item_id)
 	if aux.account_data.merchant_buy[item_id] then
 		buy_info = persistence.read(merchant_buy_schema, aux.account_data.merchant_buy[item_id])
 	end
-	return aux.account_data.merchant_sell[item_id], buy_info and buy_info.unit_price, buy_info and buy_info.limited
+	-- Prices seen at merchants first, then the client's item data (ClassicAPI), per charge.
+	local sell = aux.account_data.merchant_sell[item_id]
+	if sell == nil then
+		local price = C_Item.GetItemSellPriceByID(item_id)
+		if price and price > 0 then sell = price / (max_item_charges(item_id) or 1) end
+	end
+	return sell, buy_info and buy_info.unit_price, buy_info and buy_info.limited
 end
 
 function M.item_info(item_id)

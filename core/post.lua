@@ -90,15 +90,7 @@ function post_auction(slot, k)
 				start_price = max(start_price,tonumber(tmp) * 1.1)
 				buyout_price = max(buyout_price,tonumber(tmp) * 1.15)		
 			else 
-				if aux.account_data.merchant_sell[item_info.item_id] ~= nil then 		
-					vendor_price = tonumber(aux.account_data.merchant_sell[item_info.item_id])
-				elseif ShaguTweaks and ShaguTweaks.SellValueDB[item_info.item_id] ~= nil then
-					local charges = 1
-					if info.max_item_charges(item_info.item_id) ~= nil then 
-						charges=info.max_item_charges(item_info.item_id) 
-					end
-					vendor_price = ShaguTweaks.SellValueDB[item_info.item_id] / charges
-				end
+				vendor_price = tonumber(info.merchant_info(item_info.item_id)) or 0
 				if vendor_price	> 0 then
 					if kz_daily == 0 then
 						start_price = max(start_price, vendor_price * (1.35+3.65*math.exp(-(1/4000)* vendor_price)))
