@@ -190,7 +190,8 @@ do
 	local locked
 	function M.cancel_in_progress() return locked end
 	function M.cancel_auction(index, on_success)
-		if locked then return end
+		-- ClassicAPI 1.18.0: a row that cannot be cancelled never takes the lock.
+		if locked or not CanCancelAuction(index) then return end
 		locked = true
 		CancelAuction(index)
 		local send_signal, signal_received = signal()
