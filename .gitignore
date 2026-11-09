@@ -3,3 +3,5 @@
 .luarc.json:Zone.Identifier
 __pycache__/
 *.pyc
+CLAUDE.md
+AGENTS.md
